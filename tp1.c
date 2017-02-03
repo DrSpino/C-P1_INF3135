@@ -1,12 +1,14 @@
 #include <stdio.h>
 #include <stdlib.h>                                                     
 
+#define DNBMAXTRAVAUX 5
+
 void valideSeuil(int taille, double seuil[]);
 
 int main(int argc, char *argv[]){                                                                               
 
-	if(argc != 12){                                                                                                                 
-		printf("ERRRRREUR\n");                                                                                                  
+	if(argc != 12){
+		printf("ERRRRREUR\n");
 		exit(1);
 	}
 
@@ -16,17 +18,27 @@ int main(int argc, char *argv[]){
 			atof(argv[10]),atof(argv[11])};     
 
 	valideSeuil(argc,seuil);
+
+	int c;
+	char add;
 	
+	while((c = getchar()) != '\n')
+		add = c;
+
+	ok = atoi(add);
+	
+	printf("taille = %d\n",ok);
+
 	return 0;
 }
 
 void valideSeuil(int taille, double seuil[]){
-	int i;                                                                                                                                                                  
-	for(i = 1; i < taille-1; i++){                                                                                                                                                    
-		int n;                                                                                                                                                                  
-		for(n = i+1; n < taille; n++){                                                                                                                                                    
-			if(seuil[i] <= seuil[n]){                                                                                                                                                       
-				printf("ERRREUR 2\n");                                                                                                                                                  
+	int i;
+	for(i = 1; i < taille-1; i++){
+		int n;
+		for(n = i+1; n < taille; n++){
+			if(seuil[i] <= seuil[n]){
+				printf("ERRREUR 2\n");
 				exit(1);
 			} 
 		}            
