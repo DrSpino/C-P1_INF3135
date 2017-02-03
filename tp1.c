@@ -18,16 +18,14 @@ int main(int argc, char *argv[]){
 			atof(argv[10]),atof(argv[11])};     
 
 	valideSeuil(argc,seuil);
-
+	
 	int c;
-	char add;
+	scanf("%d",&c);
 	
-	while((c = getchar()) != '\n')
-		add = c;
-
-	ok = atoi(add);
-	
-	printf("taille = %d\n",ok);
+	if(c < 1 || c > DNBMAXTRAVAUX){
+		printf("ERRRREUR3\n");
+		exit(1);
+	}
 
 	return 0;
 }
