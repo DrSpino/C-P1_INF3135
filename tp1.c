@@ -5,6 +5,8 @@
 
 void valideSeuil(int taille, double seuil[]);
 
+int validePonderation();
+
 int main(int argc, char *argv[]){                                                                               
 
 	if(argc != 12){
@@ -19,14 +21,17 @@ int main(int argc, char *argv[]){
 
 	valideSeuil(argc,seuil);
 	
-	int c;
-	scanf("%d",&c);
+	int nbNotes = validePonderation();
 	
-	if(c < 1 || c > DNBMAXTRAVAUX){
-		printf("ERRRREUR3\n");
-		exit(1);
+	int ponderation[nbNotes];
+	
+	int v;
+	for(v = 0; v < nbNotes; v++){
+		scanf("%d",&ponderation[v]);
 	}
-
+	
+	printf("ponderation 4 =%d\n",ponderation[3]);
+	
 	return 0;
 }
 
@@ -41,4 +46,16 @@ void valideSeuil(int taille, double seuil[]){
 			} 
 		}            
 	}
+}
+
+int validePonderation(){
+	int c;
+	scanf("%d",&c);
+	
+	if(c < 1 || c > DNBMAXTRAVAUX){
+		printf("ERRRREUR3\n");
+		exit(1);
+	}
+	
+	return c;
 }
