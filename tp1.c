@@ -7,6 +7,8 @@ void valideSeuil(int taille, double seuil[]);
 
 int validePonderation();
 
+void pondererNote(int nbNotes, int ponderation[]);
+
 int main(int argc, char *argv[]){                                                                               
 
 	if(argc != 12){
@@ -22,19 +24,22 @@ int main(int argc, char *argv[]){
 	valideSeuil(argc,seuil);
 	
 	int nbNotes = validePonderation();
-	
 	int ponderation[nbNotes];
 	
+	pondererNote(nbNotes,ponderation);
+		
+	printf("ponderation 4 = %d\n",ponderation[3]);
+	
+	return 0;
+}
+
+void pondererNote(int nbNotes, int ponderation[]){
 	int v;
 	for(v = 0; v < nbNotes; v++){
 		scanf("%d",&ponderation[v]);
 	}
 	
-	printf("ponderation 4 =%d\n",ponderation[3]);
-	
-	return 0;
 }
-
 void valideSeuil(int taille, double seuil[]){
 	int i;
 	for(i = 1; i < taille-1; i++){
@@ -49,10 +54,11 @@ void valideSeuil(int taille, double seuil[]){
 }
 
 int validePonderation(){
+	const int NBMINTRAVAUX = 1;
 	int c;
 	scanf("%d",&c);
 	
-	if(c < 1 || c > DNBMAXTRAVAUX){
+	if(c < NBMINTRAVAUX || c > DNBMAXTRAVAUX){
 		printf("ERRRREUR3\n");
 		exit(1);
 	}
