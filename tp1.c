@@ -9,6 +9,8 @@ int validePonderation();
 
 void pondererNote(int nbNotes, int ponderation[]);
 
+void notesMaximales(int notesMax[]);
+
 int main(int argc, char *argv[]){                                                                               
 
 	if(argc != 12){
@@ -28,15 +30,47 @@ int main(int argc, char *argv[]){
 	
 	pondererNote(nbNotes,ponderation);
 		
+	int notesMax[nbNotes];
+
+	notesMaximales(notesMax);
+
 	printf("ponderation 4 = %d\n",ponderation[3]);
 	
+	printf("note max 4 = %d\n",notesMax[3]);
+
 	return 0;
+}
+
+void notesMaximales(int notesMax[]){
+	int i;
+
+	for(i = 0; i < 5; i++){
+		scanf("%d",&notesMax[i]);
+
+		if(notesMax[i] < 1){
+			printf("ERRREUR6\n");
+			exit(1);
+		}
+	}
+	
 }
 
 void pondererNote(int nbNotes, int ponderation[]){
 	int v;
+	int total = 0;
+
 	for(v = 0; v < nbNotes; v++){
 		scanf("%d",&ponderation[v]);
+		total += ponderation[v];
+
+		if(ponderation[v] < 0 || ponderation[v] > 100){
+			printf("ERRREUR4\n");
+			exit(1);
+		}
+	}
+	if(total != 100){
+		printf("ERREUR5\n");
+		exit(1);
 	}
 	
 }
