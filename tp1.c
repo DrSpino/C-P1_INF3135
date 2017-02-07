@@ -4,25 +4,28 @@
 
 #define DNBMAXTRAVAUX 5
 
-void valideSeuil(int taille, char *seuil[]);
+void extraireSeuil(double seuil[], char *argv[], int argc);
+void valideSeuil(int taille, double seuil[]);
 int valideNbNotes();
 void pondererNote(int nbNotes, int ponderation[]);
 void notesMaximales(int nbNote, int notesMax[]);
 void validerCodePermanent(int taille, char codePerm[]);
 float moyenneEtudiant(int nbNotes, int ponderation[], int notesMax[]);
-void ajouterNote(char *seuil[], int notesEtudiant[], float moyenne); 
+void ajouterNote(double seuil[], int notesEtudiant[], float moyenne); 
 
 int main(int argc, char *argv[]){                                                                               
+	
+	double seuil[argc-1];
+	extraireSeuil(seuil,argv,argc);
 
-	valideSeuil(argc,argv);
+	valideSeuil(argc,seuil);
 	
 	int nbNotes = valideNbNotes();
+
 	int ponderation[nbNotes];
-	
 	pondererNote(nbNotes,ponderation);
 		
 	int notesMax[nbNotes];
-
 	notesMaximales(nbNotes,notesMax);
 	
 	const int TAILLECODEPERM = 12;
@@ -37,31 +40,34 @@ int main(int argc, char *argv[]){
 		float moyenne = moyenneEtudiant(nbNotes, ponderation, notesMax);
 		nbEtudiant++;
 		
-		ajouterNote(argv, notesEtudiant, moyenne);		
+		ajouterNote(seuil, notesEtudiant, moyenne);		
 	}
 	
 	int x;
-	for(x = 1; x < 12; x++){
-		printf("%lf  =  %d\n",atof(argv[x+1]),notesEtudiant[x-1]);
+	for(x = 0; x < 12; x++){
+		printf("%lf = %d\n",seuil[x],notesEtudiant[x]);
 	}
-
 	return 0;
 }
 
+void extraireSeuil(double seuil[], char *argv[],int argc){
+	
+	int i;
+	for(i = 1;i < argc;i++){
+		seuil[i-1] = atof(argv[i]); 
+	} 
 
-void ajouterNote(char *seuil[], int notesEtudiant[], float moyenne){	
+}
+
+void ajouterNote(double seuil[], int notesEtudiant[], float moyenne){	
 
 	int i;
-	for(i = 1; i < 11; i++){
-		if(moyenne >= atof(seuil[i])){
-			if(i == 10){
-				printf("%f\n",moyenne);
-			}
-			notesEtudiant[i-1] = notesEtudiant[i-1] + 1;
+	for(i = 0; i < 11; i++){
+		if(moyenne >= seuil[i]){
+			notesEtudiant[i] = notesEtudiant[i] + 1;
 			break;
 
-		}else if(moyenne < atof(seuil[11])){
-			printf("%f\n",moyenne);
+		}else if(moyenne < seuil[10]){
 			notesEtudiant[11] = notesEtudiant[11] + 1;
 			break;
 		}
@@ -154,7 +160,7 @@ int valideNbNotes(){
 	return nbNotes;
 }
 
-void valideSeuil(int taille, char *seuil[]){
+void valideSeuil(int taille, double seuil[]){
 
 	if(taille != 12){
 		printf("ERRRRREUR\n");
@@ -162,10 +168,10 @@ void valideSeuil(int taille, char *seuil[]){
 	}
 
 	int i;
-	for(i = 1; i < taille-1; i++){
+	for(i = 0; i < taille-1; i++){
 		int n;
 		for(n = i+1; n < taille; n++){
-			if(atof(seuil[i]) <= atof(seuil[n])){
+			if(seuil[i] <= seuil[n]){
 				printf("ERRREUR 2\n");
 				exit(1);
 			} 
