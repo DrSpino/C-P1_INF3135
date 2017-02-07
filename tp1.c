@@ -1,50 +1,116 @@
 #include <stdio.h>
 #include <stdlib.h>                                                     
+#include <string.h>
 
 #define DNBMAXTRAVAUX 5
 
-void valideSeuil(int taille, double seuil[]);
-
-int validePonderation();
-
+void valideSeuil(int taille, char *seuil[]);
+int valideNbNotes();
 void pondererNote(int nbNotes, int ponderation[]);
-
-void notesMaximales(int notesMax[]);
+void notesMaximales(int nbNote, int notesMax[]);
+void validerCodePermanent(int taille, char codePerm[]);
+float moyenneEtudiant(int nbNotes, int ponderation[], int notesMax[]);
+void ajouterNote(char *seuil[], int notesEtudiant[], float moyenne); 
 
 int main(int argc, char *argv[]){                                                                               
 
-	if(argc != 12){
-		printf("ERRRRREUR\n");
-		exit(1);
-	}
-
-	double seuil [11] = {atof(argv[1]),atof(argv[2]),atof(argv[3]),
-			atof(argv[4]),atof(argv[5]),atof(argv[6]), 
-			atof(argv[7]),atof(argv[8]),atof(argv[9]), 
-			atof(argv[10]),atof(argv[11])};     
-
-	valideSeuil(argc,seuil);
+	valideSeuil(argc,argv);
 	
-	int nbNotes = validePonderation();
+	int nbNotes = valideNbNotes();
 	int ponderation[nbNotes];
 	
 	pondererNote(nbNotes,ponderation);
 		
 	int notesMax[nbNotes];
 
-	notesMaximales(notesMax);
-
-	printf("ponderation 4 = %d\n",ponderation[3]);
+	notesMaximales(nbNotes,notesMax);
 	
-	printf("note max 4 = %d\n",notesMax[3]);
+	const int TAILLECODEPERM = 12;
+	char codePermanent[TAILLECODEPERM];
+	
+	int nbEtudiant = 0;
+	int notesEtudiant[]={0,0,0,0,0,0,0,0,0,0,0,0};
+	
+	while(scanf("%s",codePermanent) != EOF){
+
+		validerCodePermanent(TAILLECODEPERM,codePermanent);
+		float moyenne = moyenneEtudiant(nbNotes, ponderation, notesMax);
+		nbEtudiant++;
+		
+		ajouterNote(argv, notesEtudiant, moyenne);		
+	}
+	
+	int x;
+	for(x = 1; x < 12; x++){
+		printf("%lf  =  %d\n",atof(argv[x+1]),notesEtudiant[x-1]);
+	}
 
 	return 0;
 }
 
-void notesMaximales(int notesMax[]){
+
+void ajouterNote(char *seuil[], int notesEtudiant[], float moyenne){	
+
+	int i;
+	for(i = 1; i < 11; i++){
+		if(moyenne >= atof(seuil[i])){
+			if(i == 10){
+				printf("%f\n",moyenne);
+			}
+			notesEtudiant[i-1] = notesEtudiant[i-1] + 1;
+			break;
+
+		}else if(moyenne < atof(seuil[11])){
+			printf("%f\n",moyenne);
+			notesEtudiant[11] = notesEtudiant[11] + 1;
+			break;
+		}
+	}
+} 
+
+float moyenneEtudiant(int nbNotes,int ponderation[], int notesMax[]){
+	float moyenne = 0.0;
+	float note;
+
+	int i;
+	for(i = 0; i < nbNotes; i++){
+		scanf("%f",&note);
+
+		if(note <= notesMax[i]){
+			moyenne = moyenne + (note*ponderation[i]);
+		}else{
+			printf("note supérieur au maximum\n");
+			exit(1);
+		}		
+	}
+
+	return moyenne/100;
+}
+
+void validerCodePermanent(int taille, char codePerm[]){
+	
+	const int NBLETTRES = 4;
+	int i;
+	for(i = 0; i < taille; i++){
+		if(i < NBLETTRES){
+			if(codePerm[i] < 'A' || codePerm[i] > 'Z'){
+				printf("erreur lettre code permanent\n");
+				exit(1);
+			}		
+		}else{
+			if(codePerm[i] < '0' || codePerm[i] > '9'){
+				printf("erreur chiffre code permanent\n");
+				exit(1);
+			}
+		}
+			
+	}
+}
+
+void notesMaximales(int nbNote,int notesMax[]){
 	int i;
 
-	for(i = 0; i < 5; i++){
+	for(i = 0; i < nbNote; i++){
 		scanf("%d",&notesMax[i]);
 
 		if(notesMax[i] < 1){
@@ -74,12 +140,32 @@ void pondererNote(int nbNotes, int ponderation[]){
 	}
 	
 }
-void valideSeuil(int taille, double seuil[]){
+
+int valideNbNotes(){
+	const int NBMINTRAVAUX = 1;
+	int nbNotes;
+	scanf("%d",&nbNotes);
+	
+	if(nbNotes < NBMINTRAVAUX || nbNotes > DNBMAXTRAVAUX){
+		printf("ERRRREUR3\n");
+		exit(1);
+	}
+	
+	return nbNotes;
+}
+
+void valideSeuil(int taille, char *seuil[]){
+
+	if(taille != 12){
+		printf("ERRRRREUR\n");
+		exit(1);
+	}
+
 	int i;
 	for(i = 1; i < taille-1; i++){
 		int n;
 		for(n = i+1; n < taille; n++){
-			if(seuil[i] <= seuil[n]){
+			if(atof(seuil[i]) <= atof(seuil[n])){
 				printf("ERRREUR 2\n");
 				exit(1);
 			} 
@@ -87,15 +173,3 @@ void valideSeuil(int taille, double seuil[]){
 	}
 }
 
-int validePonderation(){
-	const int NBMINTRAVAUX = 1;
-	int c;
-	scanf("%d",&c);
-	
-	if(c < NBMINTRAVAUX || c > DNBMAXTRAVAUX){
-		printf("ERRRREUR3\n");
-		exit(1);
-	}
-	
-	return c;
-}
