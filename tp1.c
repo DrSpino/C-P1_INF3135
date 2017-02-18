@@ -16,8 +16,13 @@ void dessinerHisto(int taille, int notesEtudiant[]);
 int nbMaxEtudiant(int nbEtudiants[],int taille);
 void noteHisto(char note[],int i);
 
+//Utile pour afficher le nom de l'executable dans les sorties d'erreur
+const char * nomExe;
+
 int main(int argc, char *argv[]){                                                                               
 	
+	//Traite et stock les arguments entrée dans le main
+	nomExe = argv[0];
 	double seuil[argc-1];
 	valideSeuil(argc,argv,seuil);
 	
@@ -32,16 +37,24 @@ int main(int argc, char *argv[]){
 	const int TAILLECODEPERM = 12;
 	char codePermanent[TAILLECODEPERM];
 	
+	/*Partie qui permet de traiter les notes des étudiants.
+	 */
 	int nbEtudiant = 0;
-	int notesEtudiant[]={0,0,0,0,0,0,0,0,0,0,0,0};
+	int notesEtudiant[12]={0};
 	
-	while(scanf("%s",codePermanent) != EOF){
+	int ret = scanf("%s",codePermanent);	
+	if(ret == 0){
+		fprintf(stderr,"%s Le nombre de pondération ou de notes maximales doivent etre égale au nombre de note !\n",nomExe);
+		exit(1);
+	}	
+	while(ret != EOF){
 
 		validerCodePermanent(TAILLECODEPERM,codePermanent);
 		float moyenne = moyenneEtudiant(nbNotes, ponderation, notesMax);
 		nbEtudiant++;
 		
 		ajouterNote(seuil, notesEtudiant, moyenne);		
+		ret = scanf("%s",codePermanent);	
 	}
 	
 	dessinerHisto(argc-1,notesEtudiant);
@@ -49,6 +62,210 @@ int main(int argc, char *argv[]){
 	return 0;
 }
 
+/*Cette fonction sert a tester que les valeurs 
+  entrees. De plus cette elle permet stocker 
+  dans un tableau seuil[] les arguments.
+  */
+void valideSeuil(int taille, char *argv[], double seuil[]){
+	int i;
+	for(i = 1;i < taille;i++){
+		seuil[i-1] = atof(argv[i]); 
+	} 
+
+	const int NBVALEURSEUIL = 12;
+	if(taille != NBVALEURSEUIL){
+		fprintf(stderr,"%s Le nombre d'arguments valeur seuil est invalide !\n",nomExe);
+		exit(1);
+	}
+
+	for(i = 0; i < taille-1; i++){
+		int n;
+		for(n = i+1; n < taille; n++){
+			if(seuil[i] <= seuil[n]){
+				fprintf(stderr,"%s Les arguments ne sont pas spécifiées par ordre décroissant !\n",nomExe);
+				exit(1);
+			} 
+		}            
+	}
+}
+
+/*Cette fonction permet de verifier que le nombre de travaux est
+  bien compris dans l'intervale demandée.
+  Elle retourne aussi le nombre de travaux dans nbNotes.
+  */
+int valideNbNotes(){
+	const int NBMINTRAVAUX = 1;
+	int nbNotes;
+	scanf("%d",&nbNotes);
+	
+	if(nbNotes < NBMINTRAVAUX || nbNotes > DNBMAXTRAVAUX){
+		fprintf(stderr,"%s le nombre d'évaluations n'est pas compris dans la limite autorisée !\n",nomExe);
+		exit(1);
+	}
+	
+	return nbNotes;
+}
+
+/*pondererNote est utilisée pour verifier que les valeurs
+  des pondérations sont bien comprises entre 0 et 100.
+  Elle les stock ensuite dans le tableau des ponderations.
+  */
+void pondererNote(int nbNotes, int ponderation[]){
+	int v;
+	int total = 0;
+
+	for(v = 0; v < nbNotes; v++){
+		scanf("%d",&ponderation[v]);
+		total += ponderation[v];
+
+		if(ponderation[v] < 0 || ponderation[v] > 100){
+			fprintf(stderr,"%s Les pondérations ne sont pas comprises entre 1 et 100 !\n",nomExe);
+			exit(1);
+		}
+	}
+	if(total != 100){
+		fprintf(stderr,"%s La somme des pondérations n'est pas égale à 100 !\n",nomExe);
+		exit(1);
+	}
+	
+}
+
+/*notesMaximales permet de verifier que les notes maximales sont positives.
+  Puis les stocks dans le tableau notesMax.
+  */
+void notesMaximales(int nbNote,int notesMax[]){
+	int i;
+
+	for(i = 0; i < nbNote; i++){
+		scanf("%d",&notesMax[i]);
+
+		if(notesMax[i] < 1){
+			fprintf(stderr,"%s Une note maximale est strictement inférieur à 1 !\n",nomExe);
+			exit(1);
+		}
+	}
+	
+}
+
+/*Cette fonction sert seulement à verifier que le code permanent
+  est valide selon les regles du devoir.
+  */
+void validerCodePermanent(int taille, char codePerm[]){
+	
+	const int NBLETTRES = 4;
+	int i;
+	for(i = 0; i < taille; i++){
+		if(i < NBLETTRES){
+			if(codePerm[i] < 'A' || codePerm[i] > 'Z'){
+				fprintf(stderr,"%s Les 4 premiers caracteres du code permanent ne sont pas des lettres majuscules !\n",nomExe);
+				exit(1);
+			}		
+		}else{
+			if(codePerm[i] < '0' || codePerm[i] > '9'){
+				fprintf(stderr,"Le code permanent ne se termine pas par 8 chiffres !\n");
+				exit(1);
+			}
+		}
+			
+	}
+}
+
+/*moyenneEtudiant est une fonction qui prend toutes les notes suivant
+  le codePermanent. Elle verifie que le nombre de note correspond à nbNotes
+  et que les notes ne sont pas supérieur à leur note maximale.
+  Ensuite elle calcul la moyenne grace aux ponderations puis la retourne.
+  */
+float moyenneEtudiant(int nbNotes,int ponderation[], int notesMax[]){
+	float moyenne = 0.0;
+	float note;
+
+	int i;
+	for(i = 0; i < nbNotes; i++){
+		
+		int ret = scanf("%f",&note);
+		if(ret == 0){
+			fprintf(stderr,"Un éleve à une note manquante !\n");			
+			exit(1);
+		}
+
+		if(note <= notesMax[i]){
+			moyenne = moyenne + (note*ponderation[i]);
+		}else{
+			fprintf(stderr,"Une note est supérieur à sont maximum autorisée !\n");
+			exit(1);
+		}		
+	}
+
+	return moyenne/100;
+}
+
+/*Cette fonction est utilisée pour attribuer une note selon
+  la moyenne obtenu par l'étudiant.
+  */
+void ajouterNote(double seuil[], int notesEtudiant[], float moyenne){	
+
+	int i;
+	for(i = 0; i < 11; i++){
+		if(moyenne >= seuil[i]){
+			notesEtudiant[i] = notesEtudiant[i] + 1;
+			break;
+
+		}else if(moyenne < seuil[10]){
+			notesEtudiant[11] = notesEtudiant[11] + 1;
+			break;
+		}
+	}
+} 
+
+/*dessinerHisto comme sont nom l'indique permet de dessiner
+  l'histogramme.
+  Elle fait appel aux fonctions nbEtudiantMax et noteHisto.
+  */
+void dessinerHisto(int taille, int notesEtudiant[]){
+	
+	int nbEtudiantMax = nbMaxEtudiant(notesEtudiant,taille);
+
+	const double largeurHistogramme = 50.00;
+	
+	int i;
+	for(i = taille; i >= 0;i--){
+		int result = ceil(notesEtudiant[i]/ceil(nbEtudiantMax/largeurHistogramme));
+		
+		char note[3];
+		noteHisto(note,i);
+		
+		printf("%s  ",note);
+		
+		int j;
+		for(j = result;j > 0;j--){
+			printf("%c",'X');
+		}
+		printf("%c",'\n');
+
+	}
+	
+	
+}
+
+/*Retourne le nbMaxEtudiant toutes notes confondu.
+  Elle est utilisé pour le calcul demandé.
+  */
+int nbMaxEtudiant(int nbEtudiants[],int taille){
+	int nbEtudiantMax = 0;
+
+	int i;
+	for(i = 0;i < taille;i++){
+		if(nbEtudiantMax < nbEtudiants[i]){
+			nbEtudiantMax = nbEtudiants[i];
+		}
+	}
+	
+	return nbEtudiantMax;
+}
+
+/*Sert à savoir sur quel note nous opérons dans la 
+  boucle par rapport au i. Stock la note dans le tableau note.
+  */
 void noteHisto(char note[],int i){
 	
 	if(i == 0){
@@ -101,172 +318,3 @@ void noteHisto(char note[],int i){
 		note[2] = '\0';
 	}
 }
-
-int nbMaxEtudiant(int nbEtudiants[],int taille){
-	int nbEtudiantMax = 0;
-
-	int i;
-	for(i = 0;i < taille;i++){
-		if(nbEtudiantMax < nbEtudiants[i]){
-			nbEtudiantMax = nbEtudiants[i];
-		}
-	}
-	
-	return nbEtudiantMax;
-}
-void dessinerHisto(int taille, int notesEtudiant[]){
-	
-	int nbEtudiantMax = nbMaxEtudiant(notesEtudiant,taille);
-
-	const double largeurHistogramme = 50.00;
-	
-	int i;
-	for(i = taille; i >= 0;i--){
-		int result = ceil(notesEtudiant[i]/ceil(nbEtudiantMax/largeurHistogramme));
-		
-		char note[3];
-		noteHisto(note,i);
-		
-		printf("%s  ",note);
-		
-		int j;
-		for(j = result;j > 0;j--){
-			printf("%c",'X');
-		}
-		printf("%c",'\n');
-
-	}
-	
-	
-}
-
-void ajouterNote(double seuil[], int notesEtudiant[], float moyenne){	
-
-	int i;
-	for(i = 0; i < 11; i++){
-		if(moyenne >= seuil[i]){
-			notesEtudiant[i] = notesEtudiant[i] + 1;
-			break;
-
-		}else if(moyenne < seuil[10]){
-			notesEtudiant[11] = notesEtudiant[11] + 1;
-			break;
-		}
-	}
-} 
-
-float moyenneEtudiant(int nbNotes,int ponderation[], int notesMax[]){
-	float moyenne = 0.0;
-	float note;
-
-	int i;
-	for(i = 0; i < nbNotes; i++){
-		
-		int ret = scanf("%f",&note);
-		if(ret == 0){
-			fprintf(stderr,"Un éleve à une note manquante !\n");			
-			exit(1);
-		}
-
-		if(note <= notesMax[i]){
-			moyenne = moyenne + (note*ponderation[i]);
-		}else{
-			fprintf(stderr,"Une note est supérieur à sont maximum autorisée !\n");
-			exit(1);
-		}		
-	}
-
-	return moyenne/100;
-}
-
-void validerCodePermanent(int taille, char codePerm[]){
-	
-	const int NBLETTRES = 4;
-	int i;
-	for(i = 0; i < taille; i++){
-		if(i < NBLETTRES){
-			if(codePerm[i] < 'A' || codePerm[i] > 'Z'){
-				fprintf(stderr,"Les 4 premiers caracteres du code permanent ne sont pas des lettres majuscules !\n");
-				exit(1);
-			}		
-		}else{
-			if(codePerm[i] < '0' || codePerm[i] > '9'){
-				fprintf(stderr,"Le code permanent ne se termine pas par 8 chiffres !\n");
-				exit(1);
-			}
-		}
-			
-	}
-}
-
-void notesMaximales(int nbNote,int notesMax[]){
-	int i;
-
-	for(i = 0; i < nbNote; i++){
-		scanf("%d",&notesMax[i]);
-
-		if(notesMax[i] < 1){
-			fprintf(stderr,"Une note maximale est strictement inférieur à 1 !\n");
-			exit(1);
-		}
-	}
-	
-}
-
-void pondererNote(int nbNotes, int ponderation[]){
-	int v;
-	int total = 0;
-
-	for(v = 0; v < nbNotes; v++){
-		scanf("%d",&ponderation[v]);
-		total += ponderation[v];
-
-		if(ponderation[v] < 0 || ponderation[v] > 100){
-			fprintf(stderr,"Les pondérations ne sont pas comprises entre 1 et 100 !\n");
-			exit(1);
-		}
-	}
-	if(total != 100){
-		fprintf(stderr,"La somme des pondérations n'est pas égale à 100 !\n");
-		exit(1);
-	}
-	
-}
-
-int valideNbNotes(){
-	const int NBMINTRAVAUX = 1;
-	int nbNotes;
-	scanf("%d",&nbNotes);
-	
-	if(nbNotes < NBMINTRAVAUX || nbNotes > DNBMAXTRAVAUX){
-		fprintf(stderr,"le nombre d'évaluations n'est pas compris dans la limite autorisée !\n");
-		exit(1);
-	}
-	
-	return nbNotes;
-}
-
-void valideSeuil(int taille, char *argv[], double seuil[]){
-
-	int i;
-	for(i = 1;i < taille;i++){
-		seuil[i-1] = atof(argv[i]); 
-	} 
-
-	const int NBVALEURSEUIL = 12;
-	if(taille != NBVALEURSEUIL){
-		fprintf(stderr,"Le nombre d'arguments valeur seuil est invalide !\n");
-		exit(1);
-	}
-
-	for(i = 0; i < taille-1; i++){
-		int n;
-		for(n = i+1; n < taille; n++){
-			if(seuil[i] <= seuil[n]){
-				fprintf(stderr,"Les arguments ne sont pas spécifiées par ordre décroissant !\n");
-				exit(1);
-			} 
-		}            
-	}
-}
-
