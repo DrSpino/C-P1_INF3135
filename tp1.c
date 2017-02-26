@@ -3,7 +3,10 @@
 #include <string.h>
 #include <math.h>
 
-#define DNBMAXTRAVAUX 5
+//Defini le nombre de travaux max
+#ifndef NBMAXTRAVAUX 
+	#define NBMAXTRAVAUX 5
+#endif
 
 void valideSeuil(int taille, char *argv[], double seuil[]);
 int valideNbNotes();
@@ -20,8 +23,7 @@ void noteHisto(char note[],int i);
 const char * nomExe;
 
 int main(int argc, char *argv[]){                                                                               
-	
-	//Traite et stock les arguments entrée dans le main
+
 	nomExe = argv[0];
 	double seuil[argc-1];
 	valideSeuil(argc,argv,seuil);
@@ -39,7 +41,6 @@ int main(int argc, char *argv[]){
 	
 	/*Partie qui permet de traiter les notes des étudiants.
 	 */
-	int nbEtudiant = 0;
 	int notesEtudiant[12]={0};
 	
 	int ret = scanf("%s",codePermanent);	
@@ -51,7 +52,6 @@ int main(int argc, char *argv[]){
 
 		validerCodePermanent(TAILLECODEPERM,codePermanent);
 		float moyenne = moyenneEtudiant(nbNotes, ponderation, notesMax);
-		nbEtudiant++;
 		
 		ajouterNote(seuil, notesEtudiant, moyenne);		
 		ret = scanf("%s",codePermanent);	
@@ -62,14 +62,14 @@ int main(int argc, char *argv[]){
 	return 0;
 }
 
-/*Cette fonction sert a tester que les valeurs 
-  entrees. De plus cette elle permet stocker 
-  dans un tableau seuil[] les arguments.
-  */
+/*Cette fonction sert a tester les arguments 
+ *entrees. Elle les stock en meme temps 
+ *dans un tableau seuil[].
+ */
 void valideSeuil(int taille, char *argv[], double seuil[]){
 	int i;
 	for(i = 1;i < taille;i++){
-		seuil[i-1] = atof(argv[i]); 
+		seuil[i-1] = strtod(argv[i], NULL); 
 	} 
 
 	const int NBVALEURSEUIL = 12;
@@ -90,15 +90,15 @@ void valideSeuil(int taille, char *argv[], double seuil[]){
 }
 
 /*Cette fonction permet de verifier que le nombre de travaux est
-  bien compris dans l'intervale demandée.
-  Elle retourne aussi le nombre de travaux dans nbNotes.
-  */
+ *bien compris dans l'intervale demandée.
+ *Elle retourne aussi le nombre de travaux dans nbNotes.
+ */
 int valideNbNotes(){
 	const int NBMINTRAVAUX = 1;
 	int nbNotes;
 	scanf("%d",&nbNotes);
 	
-	if(nbNotes < NBMINTRAVAUX || nbNotes > DNBMAXTRAVAUX){
+	if(nbNotes < NBMINTRAVAUX || nbNotes > NBMAXTRAVAUX){
 		fprintf(stderr,"%s le nombre d'évaluations n'est pas compris dans la limite autorisée !\n",nomExe);
 		exit(1);
 	}
@@ -107,9 +107,9 @@ int valideNbNotes(){
 }
 
 /*pondererNote est utilisée pour verifier que les valeurs
-  des pondérations sont bien comprises entre 0 et 100.
-  Elle les stock ensuite dans le tableau des ponderations.
-  */
+ *des pondérations sont bien comprises entre 0 et 100.
+ *Elle les stock ensuite dans le tableau des ponderations.
+ */
 void pondererNote(int nbNotes, int ponderation[]){
 	int v;
 	int total = 0;
@@ -131,8 +131,8 @@ void pondererNote(int nbNotes, int ponderation[]){
 }
 
 /*notesMaximales permet de verifier que les notes maximales sont positives.
-  Puis les stocks dans le tableau notesMax.
-  */
+ *Puis les stocks dans le tableau notesMax[].
+ */
 void notesMaximales(int nbNote,int notesMax[]){
 	int i;
 
@@ -148,8 +148,8 @@ void notesMaximales(int nbNote,int notesMax[]){
 }
 
 /*Cette fonction sert seulement à verifier que le code permanent
-  est valide selon les regles du devoir.
-  */
+ *est valide selon les regles du devoir.
+ */
 void validerCodePermanent(int taille, char codePerm[]){
 	
 	const int NBLETTRES = 4;
@@ -171,10 +171,10 @@ void validerCodePermanent(int taille, char codePerm[]){
 }
 
 /*moyenneEtudiant est une fonction qui prend toutes les notes suivant
-  le codePermanent. Elle verifie que le nombre de note correspond à nbNotes
-  et que les notes ne sont pas supérieur à leur note maximale.
-  Ensuite elle calcul la moyenne grace aux ponderations puis la retourne.
-  */
+ *le codePermanent. Elle verifie que le nombre de note correspond à nbNotes
+ *et que les notes ne sont pas supérieur à leur note maximale.
+ *Ensuite elle calcul la moyenne grace aux ponderations puis la retourne.
+ */
 float moyenneEtudiant(int nbNotes,int ponderation[], int notesMax[]){
 	float moyenne = 0.0;
 	float note;
@@ -200,8 +200,8 @@ float moyenneEtudiant(int nbNotes,int ponderation[], int notesMax[]){
 }
 
 /*Cette fonction est utilisée pour attribuer une note selon
-  la moyenne obtenu par l'étudiant.
-  */
+ *la moyenne obtenu par l'étudiant.
+ */
 void ajouterNote(double seuil[], int notesEtudiant[], float moyenne){	
 
 	int i;
@@ -218,9 +218,9 @@ void ajouterNote(double seuil[], int notesEtudiant[], float moyenne){
 } 
 
 /*dessinerHisto comme sont nom l'indique permet de dessiner
-  l'histogramme.
-  Elle fait appel aux fonctions nbEtudiantMax et noteHisto.
-  */
+ *l'histogramme.
+ *Elle fait appel aux fonctions nbEtudiantMax et noteHisto.
+ */
 void dessinerHisto(int taille, int notesEtudiant[]){
 	
 	int nbEtudiantMax = nbMaxEtudiant(notesEtudiant,taille);
@@ -247,9 +247,7 @@ void dessinerHisto(int taille, int notesEtudiant[]){
 	
 }
 
-/*Retourne le nbMaxEtudiant toutes notes confondu.
-  Elle est utilisé pour le calcul demandé.
-  */
+//Retourne le nombre max d'etudiant toutes notes confondues.
 int nbMaxEtudiant(int nbEtudiants[],int taille){
 	int nbEtudiantMax = 0;
 
@@ -264,8 +262,9 @@ int nbMaxEtudiant(int nbEtudiants[],int taille){
 }
 
 /*Sert à savoir sur quel note nous opérons dans la 
-  boucle par rapport au i. Stock la note dans le tableau note.
-  */
+ *boucle par grace à i. Elle Stock la chaine de caractere de la note
+ *qui correspond dans le tableau note[].
+ */
 void noteHisto(char note[],int i){
 	
 	if(i == 0){
